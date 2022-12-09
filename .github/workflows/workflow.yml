@@ -1,0 +1,38 @@
+name: base CI
+
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, which is the CWD for
+    # the rest of the steps.
+    - uses: actions/checkout@v2
+
+    # Caches and restores the bazel build directory.
+    - name: Cache bazel build results
+      uses: actions/cache@v2.0.0
+      env:
+        cache-name: bazel-cache
+      with:
+        path: ~/.cache/bazel
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.ref }}
+        restore-keys: |
+          ${{ runner.os }}-${{ env.cache-name }}-master
+
+    - name: Build
+      run: bazel build base/base_tests
+
+    - name: Run tests
+      run: bazel test base/base_tests --test_output=all

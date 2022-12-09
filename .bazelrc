@@ -1,0 +1,3 @@
+build --cxxopt="-std=c++17"
+# For now the default is debug builds
+build --copt="-g" --strip=never --spawn_strategy=standalone
