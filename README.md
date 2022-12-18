@@ -18,9 +18,20 @@ projects.
 
 ### Table of contents
 
+- [Supported platforms](#supported-platforms)
 - [Overview](#overview)
 
 ----
+
+
+## Supported platforms
+
+![Linux](./assets/linux.svg)
+![macOS](./assets/apple.svg)
+
+In progress:
+
+![Windows](./assets/windows.svg)
 
 
 ## Overview
