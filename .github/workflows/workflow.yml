@@ -32,7 +32,7 @@ jobs:
           ${{ runner.os }}-${{ env.cache-name }}-master
 
     - name: Build
-      run: bazel build base/base_tests
+      run: bazel build base/base_tests examples
 
     - name: Run tests
       run: bazel test base/base_tests --test_output=all
