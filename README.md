@@ -168,7 +168,7 @@ or...
 
 
 ```sh
-$ bazel build base/mage_tests
+$ bazel build base/base_tests
 $ ./bazel-bin/base/base_tests
 ```
 
