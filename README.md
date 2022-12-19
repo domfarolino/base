@@ -185,6 +185,7 @@ $ lldb ./bazel-bin/base/base_tests
 $ br s -n TaskLoopForIO::Run
 $ br s -f task_loop_for_io_test.cc -l <line_number>
 $ run --gtest_filter="TaskLoopForIOTestBase.BasicSocketReading"
+```
 
 [^1]: Right now since `//base` is in an early development phase, no
 platform-specific UI work has been implemented, and `TaskLoopForUI` is just an
