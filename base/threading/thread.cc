@@ -61,15 +61,13 @@ void Thread::StopImpl(bool wait_for_idle) {
     return;
   }
 
-  // If we get here, then we know |Start()| has been called at least once, but
-  // |delegate_| may be null if it has quit itself and already terminated the
-  // backing thread.
-  if (delegate_) {
-    if (wait_for_idle)
-      delegate_->QuitWhenIdle();
-    else
-      delegate_->Quit();
-  }
+  // If we get here, then we know |Start()| has been called at least once, and
+  // therefore `delegate_` is non-null.
+  CHECK(delegate_);
+  if (wait_for_idle)
+    delegate_->QuitWhenIdle();
+  else
+    delegate_->Quit();
 
   join();
 }
@@ -85,20 +83,23 @@ void Thread::join() {
   // It is possible that the underlying physical thread actually stopped running
   // before this |join()| call e.g., if a task running on said thread ran
   // |base::GetCurrentThreadTaskLoop()->Quit()| at some point. In that case, we
-  // reset |delegate_| but we don't reset |started_via_api_|, because if we did
-  // that would encourage what we consider to be an abuse of this API. For
-  // example, we want to discourage the following sequence:
-  //   1.) [Main Thread]: Creates a base::Thread, and Start()s it.
+  // we still haven't reset |started_via_api_| just yet, because if we did that
+  // would encourage what we consider to be an abuse of this API. For example,
+  // we want to discourage the following sequence:
+  //   1.) [Main Thread]: Creates a `base::Thread`, and `Start()`s it.
   //   2.) [Other Thread]: Eventually quits itself, stopping the run loop
   //   3.) [Main Thread]: Listens to some side effect of [Other Thread] quitting
   //       itself so that it knows it can call |Start()| again to re-run the
   //       thread.
   // Listening to side effects of the backing thread terminated is fine, but we
-  // want to prevent the main thread from calling Start() again before calling
-  // calling Stop() or join(), in case it misread the side effects of the
-  // backing thread terminating. If you think a base::Thread has stopped
-  // running, you must confirm this the base::Thread API via |join()| or |Stop()|.
+  // want to prevent the main thread from calling Start() again before
+  // explicitly calling `Stop()` or `join()`, in case it misread the side
+  // effects of the backing thread terminating. If you think a base::Thread has
+  // stopped running, you must confirm this the base::Thread API via |join()| or
+  // |Stop()|.
   started_via_api_ = false;
+  CHECK(delegate_);
+  delegate_.reset();
 }
 
 void Thread::RegisterDelegateResetCallbackForTesting(OnceClosure cb) {
@@ -112,7 +113,6 @@ void* Thread::ThreadFunc(void* in) {
 
   thread->ThreadMain();
 
-  thread->delegate_.reset();
   if (thread->delegate_reset_callback_for_testing_)
     thread->delegate_reset_callback_for_testing_();
 

@@ -102,9 +102,11 @@ TEST_P(ThreadTest, StartAfterThreadTerminatesButBeforeJoinOrStop) {
   delegate_reset_waiter->Run();
 
   // At this point we know that the thread's delegate has been "quit" and the
-  // underlying thread has been entirely terminated. Delegate should be reset
-  // and therefore unable to produce task runners.
-  EXPECT_FALSE(thread->GetTaskRunner());
+  // underlying thread has been entirely terminated. The internal delegate,
+  // which vends per-base::Thread TaskRunners, however, does not get reset until
+  // `Stop()` is called, so it is able to produce TaskRunners for the underlying
+  // thread even if it has terminated itself.
+  EXPECT_TRUE(thread->GetTaskRunner());
 
   // Calling |Start()| should fail because neither |Stop()| nor |join()| have
   // been called yet.

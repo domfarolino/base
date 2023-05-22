@@ -74,13 +74,14 @@ class Thread {
   // The intention is to have |delegate_| be uniquely owned by |this|, but to be
   // able to create many new |TaskRunner| objects that all weakly reference
   // |delegate_|. See the documentation above |TaskRunner| for more information.
-  // This member is access both on the thread owning |this|, and the backing
-  // thread that |this| manages. It is set and reset in the following ways:
+  // This member is accessed both on the thread owning |this|, and the backing
+  // thread that |this| manages, however it is only ever assigned/reset on the
+  // thread owning `this`, and is thread-safe even without synchronization
+  // because its reset only takes place after the backing thread has been
+  // terminated/joined. It is set and reset in the following ways:
   //   - Start() => creates a new |delegate_|
-  //   - ThreadFunc() => when |delegate_->Run()| finishes, |delegate_| is
-  //     reset/destroyed. This means that |delegate_| is reset after calls to
-  //     Stop()/join().
-  // TODO(domfarolino): Add a mutex to synchronize access to this variable.
+  //   - Stop()/join() => `delegate_` is reset here, only after the backing
+  //     thread officially terminates
   std::shared_ptr<Delegate> delegate_;
 
  private:
@@ -98,6 +99,17 @@ class Thread {
   // we require a call to Stop()/join() before calling Start() again.
   bool started_via_api_ = false;
 
+  // When supplied by a test, this callback is the very last thing run on the
+  // backing thread that `this` represents. It is run immediately after the
+  // backing thread's delegate run loop ends, and just before it officially
+  // terminates/exits. It is used to test the base::Thread API surface
+  // immediately after its backing thread terminates but before `Stop()` is
+  // called. An alternative would be to just post a task to the backing thread
+  // to `Quit()` the loop of both the backing thread *and* the caller/test to
+  // give a signal for when the backing thread is terminating, but that task
+  // would technically run *during* the backing thread's `Run()` loop. This is a
+  // more explicit signal that the internal run loop has ended, and this is the
+  // final hook that can run before thread termination.
   OnceClosure delegate_reset_callback_for_testing_;
 };
 
