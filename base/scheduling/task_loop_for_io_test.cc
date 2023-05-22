@@ -78,12 +78,10 @@ class TestSocketReader : public base::TaskLoopForIO::SocketReader {
   TestSocketReader(int fd, TaskLoopForIOTestBase& callback_object) :
     base::TaskLoopForIO::SocketReader::SocketReader(fd),
     callback_object_(callback_object) {
-    std::static_pointer_cast<base::TaskLoopForIO>(
-      base::GetIOThreadTaskLoop())->WatchSocket(this);
+    base::GetIOThreadTaskLoop()->WatchSocket(this);
   }
   ~TestSocketReader() {
-    std::static_pointer_cast<base::TaskLoopForIO>(
-      base::GetIOThreadTaskLoop())->UnwatchSocket(this);
+    base::GetIOThreadTaskLoop()->UnwatchSocket(this);
   }
 
   void OnCanReadFromSocket() override {
