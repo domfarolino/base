@@ -89,7 +89,7 @@ TEST_P(ThreadTest, GetTaskRunnerBeforeStart) {
 TEST_P(ThreadTest, StartAfterThreadTerminatesButBeforeJoinOrStop) {
   std::shared_ptr<TaskLoop> delegate_reset_waiter =
     TaskLoop::Create(ThreadType::WORKER);
-  thread->RegisterDelegateResetCallbackForTesting(
+  thread->RegisterBackingThreadTerminateCallbackForTesting(
     delegate_reset_waiter->QuitClosure());
 
   thread->Start();

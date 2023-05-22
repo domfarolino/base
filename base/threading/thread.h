@@ -59,7 +59,7 @@ class Thread {
   static void sleep_for(std::chrono::milliseconds ms);
   void join();
 
-  void RegisterDelegateResetCallbackForTesting(OnceClosure cb);
+  void RegisterBackingThreadTerminateCallbackForTesting(OnceClosure cb);
 
  protected:
   // These methods run on the newly-created thread.
@@ -110,7 +110,7 @@ class Thread {
   // would technically run *during* the backing thread's `Run()` loop. This is a
   // more explicit signal that the internal run loop has ended, and this is the
   // final hook that can run before thread termination.
-  OnceClosure delegate_reset_callback_for_testing_;
+  OnceClosure backing_thread_terminate_callback_for_testing_;
 };
 
 } // namespace base

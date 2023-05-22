@@ -102,8 +102,8 @@ void Thread::join() {
   delegate_.reset();
 }
 
-void Thread::RegisterDelegateResetCallbackForTesting(OnceClosure cb) {
-  delegate_reset_callback_for_testing_ = std::move(cb);
+void Thread::RegisterBackingThreadTerminateCallbackForTesting(OnceClosure cb) {
+  backing_thread_terminate_callback_for_testing_ = std::move(cb);
 }
 
 // static
@@ -113,8 +113,8 @@ void* Thread::ThreadFunc(void* in) {
 
   thread->ThreadMain();
 
-  if (thread->delegate_reset_callback_for_testing_)
-    thread->delegate_reset_callback_for_testing_();
+  if (thread->backing_thread_terminate_callback_for_testing_)
+    thread->backing_thread_terminate_callback_for_testing_();
 
   pthread_exit(0);
 }
