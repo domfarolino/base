@@ -4,6 +4,7 @@
 
 #include "base/check.h"
 #include "base/scheduling/task_loop.h"
+#include "base/scheduling/task_loop_for_io.h"
 
 namespace base {
 
@@ -12,7 +13,7 @@ namespace base {
 // These are weak process-global pointers to underlying |TaskLoop|s that we wish
 // to reference but not keep alive.
 static std::weak_ptr<TaskLoop> g_ui_task_loop;
-static std::weak_ptr<TaskLoop> g_io_task_loop;
+static std::weak_ptr<TaskLoopForIO> g_io_task_loop;
 
 // Thread-global pointers (global only within a thread).
 // Weak pointer for the same reason above.
@@ -22,7 +23,7 @@ void SetUIThreadTaskLoop(std::weak_ptr<TaskLoop> ui_task_loop) {
   g_ui_task_loop = ui_task_loop;
 }
 
-void SetIOThreadTaskLoop(std::weak_ptr<TaskLoop> io_task_loop) {
+void SetIOThreadTaskLoop(std::weak_ptr<TaskLoopForIO> io_task_loop) {
   g_io_task_loop = io_task_loop;
 }
 
@@ -39,8 +40,8 @@ std::shared_ptr<TaskLoop> GetUIThreadTaskLoop() {
   return task_loop;
 }
 
-std::shared_ptr<TaskLoop> GetIOThreadTaskLoop() {
-  std::shared_ptr<TaskLoop> task_loop = g_io_task_loop.lock();
+std::shared_ptr<TaskLoopForIO> GetIOThreadTaskLoop() {
+  std::shared_ptr<TaskLoopForIO> task_loop = g_io_task_loop.lock();
   return task_loop;
 }
 

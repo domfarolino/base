@@ -21,7 +21,8 @@ void TaskLoop::BindToCurrentThread(ThreadType type) {
       break;
     case ThreadType::IO:
       CHECK(!GetIOThreadTaskLoop());
-      SetIOThreadTaskLoop(GetWeakPtr());
+      SetIOThreadTaskLoop(
+          std::dynamic_pointer_cast<TaskLoopForIO>(shared_from_this()));
       CHECK(GetIOThreadTaskLoop());
       break;
     case ThreadType::WORKER:
